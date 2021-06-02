@@ -15,5 +15,6 @@ Run script by calling `python reports-fetch.py` in root directory. Requires an a
 
 ## Missing/Planned functionality
 
+- REFACTOR!!
 - Fetch token and refresh regularly.
 - Display content of offense
