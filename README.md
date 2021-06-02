@@ -12,3 +12,8 @@ token = "Kitsu accesstoken"
 ~~~
 
 Run script by calling `python reports-fetch.py` in root directory. Requires an account with moderator or admin priviledges on Kitsu.
+
+## Missing/Planned functionality
+
+- Fetch token and refresh regularly.
+- Display content of offense
