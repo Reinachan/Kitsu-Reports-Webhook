@@ -4,15 +4,16 @@ import json
 import time
 import os
 import env
+import lib.constants as constants
+import lib.get_user as get_user
+import lib.get_url_type as get_url_type
+import lib.get_offender as get_offender
+import lib.get_image as get_image
 
 def fetch_reports():
   # FETCH DATA FROM KITSU
-  url = "https://kitsu.io/api/edge/reports?sort=-id"
-  headers = {
-    'Accept': 'application/vnd.api+json',
-    'Content-Type': 'application/vnd.api+json',
-    'Authorization': 'Bearer ' + env.token
-  }
+  url = constants.url
+  headers = constants.headers
   response = requests.get(url, headers=headers)
   data = json.loads(response.text)
 
@@ -28,41 +29,6 @@ def fetch_reports():
 
 
   # SORT OUT TO ONLY NEW REPORTS
-  def get_user(rel):
-    user = requests.get(rel["user"]["links"]["related"], headers=headers)
-    user = json.loads(user.text)
-    user = user["data"]["attributes"]
-    return user
-
-  def get_url_type(ntype):
-    if ntype == "Post":
-      return "posts"
-    elif ntype == "Comment":
-      return "comments"
-    elif ntype == "Reaction":
-      return "media-reactions"
-    elif ntype == "Review":
-      return "reviews"
-
-  def get_offender(post_type, post_id):
-    url_offender = "https://kitsu.io/api/edge/" + post_type + "/" + str(post_id) + "?include=user"
-
-    print(url_offender)
-
-    offender_data = ""
-    try: 
-      offender_data = requests.get(url_offender, headers=headers)
-      offender_data = json.loads(offender_data.text)
-      print(offender_data["included"][0]["attributes"]["name"])
-    except: 
-      offender_data = None
-    finally: return offender_data
-
-
-
-
-
-
   new_reports = []
 
   for report in data["data"]:
@@ -71,24 +37,34 @@ def fetch_reports():
       attr = report["attributes"]
       rel = report["relationships"]
 
-      reporter = get_user(rel)
+      reporter = get_user.get_user(rel)
 
       naughty_type = attr["naughtyType"]
-      naughty_url_type = get_url_type(naughty_type)
+      naughty_url_type = get_url_type.get_url_type(naughty_type)
 
       post_url = "https://kitsu.io/" + naughty_url_type + "/" + str(attr["naughtyId"])
 
-      offender = get_offender(naughty_url_type, attr["naughtyId"])
+      offender = get_offender.get_offender(naughty_url_type, attr["naughtyId"])
 
-      offender_name = ""
       if offender:
         print(offender)
         offender_name = offender["included"][0]["attributes"]["name"]
-        offender_text = offender["included"][0]["attributes"]["name"]
+        
+        if naughty_url_type == "media-reactions":
+          offender_text = offender["data"]["attributes"]["reaction"]
+        else:
+          offender_text = offender["data"]["attributes"]["content"]
+          if offender["data"]["relationships"]["uploads"]["links"]["related"]:
+            offending_image = get_image.get_image(offender["data"]["relationships"]["uploads"]["links"]["related"])
+          else:
+            offending_image = None
+          
+        
       else:
         offender_name = "Missing"
+        offender_text = "Missing"
 
-      description = "**Explanation**\n" + str(attr["explanation"]) + "\n\n**Offender**\n" + str(offender_name) + "\n\n**Offence**\n" + str()
+      description = "**Explanation**\n" + str(attr["explanation"]) + "\n\n**Offender**\n" + str(offender_name) + "\n\n**Offense**\n" + str(offender_text)
 
       print(description)
 
@@ -97,6 +73,9 @@ def fetch_reports():
         "timestamp": attr["createdAt"],
         "description": description,
         "color": "16208182",
+        "image": {
+          "url": offending_image,
+        },
         "author": {
           "name": reporter["name"],
           "url": "https://kitsu.io/admin/reports/open",
@@ -149,4 +128,4 @@ def fetch_reports():
 while True:
   fetch_reports()
   print("Fetched")
-  time.sleep(300)
+  time.sleep(60)
