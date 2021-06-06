@@ -6,6 +6,7 @@ import json
 import time
 import os
 import env
+import traceback
 import lib.constants as constants
 import lib.get_user as get_user
 import lib.get_url_type as get_url_type
@@ -44,78 +45,97 @@ def fetch_reports():
 
   if "data" in data:
     for report in data["data"]:
-      if report["id"] > latest_report:
-        # Structure data for Discord
-        attr = report["attributes"]
-        rel = report["relationships"]
+      try: 
+        if report["id"] > latest_report:
+          # Structure data for Discord
+          attr = report["attributes"]
+          rel = report["relationships"]
 
-        reporter = get_user.get_user(rel)
+          reporter = get_user.get_user(rel)
 
-        naughty_type = attr["naughtyType"]
-        naughty_url_type = get_url_type.get_url_type(naughty_type)
+          naughty_type = attr["naughtyType"]
+          naughty_url_type = get_url_type.get_url_type(naughty_type)
 
-        post_url = "https://kitsu.io/" + naughty_url_type + "/" + str(attr["naughtyId"])
+          post_url = "https://kitsu.io/" + naughty_url_type + "/" + str(attr["naughtyId"])
 
-        offender = get_offender.get_offender(naughty_url_type, attr["naughtyId"])
+          offender = get_offender.get_offender(naughty_url_type, attr["naughtyId"])
 
-        offending_image = None
-        if offender:
-          offender_name = offender["included"][0]["attributes"]["name"]
-          offender_id = offender["included"][0]["id"]
-          
-          if naughty_url_type == "media-reactions":
-            offender_text = offender["data"]["attributes"]["reaction"]
-          elif naughty_url_type == "reviews":
-            offender_text = offender["data"]["attributes"]["content"]
-          else:
-            offender_text = offender["data"]["attributes"]["content"]
-            if offender["data"]["relationships"]["uploads"]["links"]["related"]:
-              offending_image = get_image.get_image(offender["data"]["relationships"]["uploads"]["links"]["related"])
-            else:
-              offending_image = None
+          offending_image = None
+          if offender:
+            offender_name = offender["included"][0]["attributes"]["name"]
+            offender_id = offender["included"][0]["id"]
             
-          
-        else:
-          offender_name = "Missing"
-          offender_text = "Missing"
-          offender_id = "2"
+            if naughty_url_type == "media-reactions":
+              offender_text = offender["data"]["attributes"]["reaction"]
+            elif naughty_url_type == "reviews":
+              offender_text = offender["data"]["attributes"]["content"]
+            else:
+              offender_text = offender["data"]["attributes"]["content"]
+              if offender["data"]["relationships"]["uploads"]["links"]["related"]:
+                offending_image = get_image.get_image(offender["data"]["relationships"]["uploads"]["links"]["related"])
+              else:
+                offending_image = None
+              
+            
+          else:
+            offender_name = "Missing"
+            offender_text = "Missing"
+            offender_id = "2"
 
-        description = "**Explanation**\n" + str(attr["explanation"]) + "\n\n**Offender**\n" + "[" + str(offender_name) + "](https://kitsu.io/users/" + str(offender_id) + ")" + "\n\n**Offense**\n" + str(offender_text)
+          description = "**Explanation**\n" + str(attr["explanation"]) + "\n\n**Offender**\n" + "[" + str(offender_name) + "](https://kitsu.io/users/" + str(offender_id) + ")" + "\n\n**Offense**\n" + str(offender_text)
 
-        description = (description[:1040] + ' …') if len(description) > 1040 else description
-        print(description)
+          description = (description[:1040] + ' …') if len(description) > 1040 else description
+          print(description)
 
+          discord = {
+            "url": post_url,
+            "timestamp": attr["createdAt"],
+            "description": description,
+            "color": "16208182",
+            "image": {
+              "url": offending_image,
+            },
+            "author": {
+              "name": reporter["name"],
+              "url": "https://kitsu.io/admin/reports/open",
+              "icon_url": reporter["avatar"]["small"],
+            },
+            "footer": {
+              "text": "Status: " + attr["status"]
+            },
+            "fields": [
+              {
+                "name": "Links",
+                "value": "[" + attr["naughtyType"] + "](" + post_url + ")\n" + "[All Reports](https://kitsu.io/admin/reports/open)",
+                "inline": "true",
+              },
+              {
+                "name": "Reason",
+                "value": attr["reason"],
+                "inline": "true",
+              },
+            ],
+          }
+
+          new_reports.append(discord)
+      except Exception:
+        print("exception!")
         discord = {
-          "url": post_url,
-          "timestamp": attr["createdAt"],
-          "description": description,
-          "color": "16208182",
-          "image": {
-            "url": offending_image,
-          },
-          "author": {
-            "name": reporter["name"],
-            "url": "https://kitsu.io/admin/reports/open",
-            "icon_url": reporter["avatar"]["small"],
-          },
-          "footer": {
-            "text": "Status: " + attr["status"]
+          "title": "Something went wrong!",
+          "description": "Here's some technobabble about it:\n```py\n" + traceback.format_exc() + "\n```",
+          "footer": { 
+            "text": "This error almost killed the script! Don't worry. Reina's totally awesome, super-great, not at all bad coding skills gracefully handled this exception which means you'll just have to go to the website to view this report instead",
           },
           "fields": [
             {
               "name": "Links",
-              "value": "[" + attr["naughtyType"] + "](" + post_url + ")\n" + "[All Reports](https://kitsu.io/admin/reports/open)",
+              "value": "[All Reports](https://kitsu.io/admin/reports/open)",
               "inline": "true",
             },
-            {
-              "name": "Reason",
-              "value": attr["reason"],
-              "inline": "true",
-            },
-          ],
+          ]
         }
-
         new_reports.append(discord)
+        
   else:
     env.token = authentication(env.slug, env.password)
     print("117: fetching token")
