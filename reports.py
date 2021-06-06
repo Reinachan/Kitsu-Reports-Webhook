@@ -16,7 +16,6 @@ import lib.discord
 stop_code = False
 
 def fetch_reports():
-  print(env.token)
   # FETCH DATA FROM KITSU
   url = constants.url
   headers = constants.headers
@@ -37,7 +36,7 @@ def fetch_reports():
         latest_report = obj["data"][0]["id"]
       else:
         env.token = authentication(env.slug, env.password)
-        print("fetching token")
+        print("39: fetching token")
 
 
   # SORT OUT TO ONLY NEW REPORTS
@@ -61,11 +60,13 @@ def fetch_reports():
 
         offending_image = None
         if offender:
-          print(offender)
           offender_name = offender["included"][0]["attributes"]["name"]
+          offender_id = offender["included"][0]["id"]
           
           if naughty_url_type == "media-reactions":
             offender_text = offender["data"]["attributes"]["reaction"]
+          elif naughty_url_type == "reviews":
+            offender_text = offender["data"]["attributes"]["content"]
           else:
             offender_text = offender["data"]["attributes"]["content"]
             if offender["data"]["relationships"]["uploads"]["links"]["related"]:
@@ -77,8 +78,9 @@ def fetch_reports():
         else:
           offender_name = "Missing"
           offender_text = "Missing"
+          offender_id = "2"
 
-        description = "**Explanation**\n" + str(attr["explanation"]) + "\n\n**Offender**\n" + str(offender_name) + "\n\n**Offense**\n" + str(offender_text)
+        description = "**Explanation**\n" + str(attr["explanation"]) + "\n\n**Offender**\n" + "[" + str(offender_name) + "](https://kitsu.io/users/" + str(offender_id) + ")" + "\n\n**Offense**\n" + str(offender_text)
 
         description = (description[:1040] + ' …') if len(description) > 1040 else description
         print(description)
@@ -116,7 +118,7 @@ def fetch_reports():
         new_reports.append(discord)
   else:
     env.token = authentication(env.slug, env.password)
-    print("fetching token")
+    print("117: fetching token")
 
 
   for nreport in new_reports[::-1]:
@@ -145,7 +147,7 @@ def fetch_reports():
     with open("reports.json", "w") as write_file:
       json.dump(data, write_file, indent=4)
   else:
-    print("probably invalid token or smth. No 'data' in the response")
+    print("148: probably invalid token or smth. No 'data' in the response")
 
 while True:
   if env.authenticated:  
