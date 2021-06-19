@@ -13,6 +13,7 @@ import lib.get_url_type as get_url_type
 import lib.get_offender as get_offender
 import lib.get_image as get_image
 import lib.discord
+import encodings
 
 stop_code = False
 
@@ -67,10 +68,13 @@ def fetch_reports():
             
             if naughty_url_type == "media-reactions":
               offender_text = offender["data"]["attributes"]["reaction"]
+              offender_text = json.dumps(offender_text, ensure_ascii=False)
             elif naughty_url_type == "reviews":
               offender_text = offender["data"]["attributes"]["content"]
+              offender_text = json.dumps(offender_text, ensure_ascii=False)
             else:
               offender_text = offender["data"]["attributes"]["content"]
+              offender_text = json.dumps(offender_text, ensure_ascii=False)
               if offender["data"]["relationships"]["uploads"]["links"]["related"]:
                 offending_image = get_image.get_image(offender["data"]["relationships"]["uploads"]["links"]["related"])
               else:
