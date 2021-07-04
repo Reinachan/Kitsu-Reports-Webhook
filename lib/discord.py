@@ -17,7 +17,9 @@ import time
 
 class Discord:
     def __init__(self, report) -> None:
-        self.username = report.reporter.name or "Kitsu Reports"
+        self.username = (
+            report.reporter.name if report.reporter.name else "Kitsu Reports"
+        )
         self.avatar_url = (
             report.reporter.avatar
             or "https://avatars.githubusercontent.com/u/7648832?s=200&v=4"
@@ -38,7 +40,7 @@ class Discord:
     def post(self):
         query = {
             "wait": "true",
-            "Authorization": "sIYuxm30lkHt9Ex0UPfzQ00O6C4WcmG3UIhg6WMQtfTvkxSLl4b_wfRnsBbGnq62tpr_",
+            "Authorization": os.environ["DISCORD_BEARER"],
         }
 
         try:
@@ -67,13 +69,10 @@ class Discord:
                     "author": {
                         "name": self.report.naughty.name,
                         "icon_url": self.report.naughty.avatar,
+                        "url": self.report.naughty.url,
                     },
                     "title": self.report.type,
                     "description": description,
-                    "provider": {
-                        "name": "TEST",
-                        "url": "https://kitsu.io",
-                    },
                     "footer": {
                         "text": f"{self.report.moderator.name} - {self.report.status}",
                         "icon_url": self.report.moderator.avatar,
@@ -95,9 +94,15 @@ class Discord:
                             "components": [
                                 {
                                     "type": 2,
-                                    "label": "AJZ",
+                                    "label": self.report.type,
                                     "style": 5,
-                                    "url": "https://kitsu.io/users/657435",
+                                    "url": content_link,
+                                },
+                                {
+                                    "type": 2,
+                                    "label": self.report.naughty.name,
+                                    "style": 5,
+                                    "url": "",
                                 },
                                 {
                                     "type": 2,
@@ -119,16 +124,3 @@ class Discord:
         print(response)
 
         time.sleep(1)
-
-
-# li = {
-#     "components": [
-#         {
-#             "type": 2,
-#             "label": "All Reports",
-#             "style": 5,
-#             "url": "https://kitsu.io/admin/reports",
-#         },
-#         {"type": 2, "label": "AJZ", "style": 5, "url": "https://kitsu.io/users/657435"},
-#     ]
-# }
