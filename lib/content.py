@@ -2,7 +2,7 @@ from typing import Optional
 
 
 class Content:
-    def __init__(self, content) -> None:
+    def __init__(self, content, post_id) -> None:
         self.id: Optional[str] = content["id"] or None
         self.url: Optional[str]
         self.text: Optional[str] = content["content"] or None
@@ -11,9 +11,9 @@ class Content:
         self.media_title: Optional[str] = None
         self.media_poster: Optional[str] = None
 
-        self.content_type()
+        self.content_type(post_id)
 
-    def content_type(self):
+    def content_type(self, post_id):
         if self.type == "MediaReaction":
             self.url = f"https://kitsu.io/media-reactions/{self.id}"
             self.media_title = self.content["media"]["titles"]["canonical"]

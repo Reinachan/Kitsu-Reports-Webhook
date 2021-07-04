@@ -9,6 +9,7 @@ requests = "*"
 gql = {extras = ["all"], version = "*"}
 
 [dev-packages]
+black = "*"
 
 [requires]
 python_version = "3.9"

@@ -1,38 +1,28 @@
 from dotenv import load_dotenv
 from lib.report import fetch_reports
-import requests
+import sqlite3
+from sqlite3 import Error
 
-load_dotenv(".env")
 
-# fetch_reports()
+def create_connection(db_file):
+    """create a database connection to a SQLite database"""
+    conn = None
+    try:
+        conn = sqlite3.connect(db_file)
+        print(sqlite3.version)
 
-payload = {
-    "content": "This is a message with components",
-    "components": [
-        {
-            "type": 1,
-            "components": [
-                {
-                    "type": 2,
-                    "label": "Click me!",
-                    "style": 5,
-                    "url": "https://pressfire.no",
-                }
-            ],
-        }
-    ],
-}
+        cur = conn.cursor()
+        return cur.execute("SELECT * from report")
+    except Error as e:
+        print(e)
+    finally:
+        if conn:
+            conn.close()
 
-query = {
-    "wait": "true",
-    "Authorization": "Bot ODQ5Mzg1ODE5NTYyNTczODc0.YLaaMA.Vzryc72O0OK_dkks87tkQGRTWXY",
-}
 
-response = requests.post(
-    "https://discord.com/api/webhooks/855958892827246593/sIYuxm30lkHt9Ex0UPfzQ00O6C4WcmG3UIhg6WMQtfTvkxSLl4b_wfRnsBbGnq62tpr_",
-    params=query,
-    json=payload,
-)
+if __name__ == "__main__":
+    load_dotenv()
 
-print(response.headers)
-print(response.text)
+    cursor = create_connection(r"reports.db")
+
+    fetch_reports(cursor)
