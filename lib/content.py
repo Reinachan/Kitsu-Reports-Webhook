@@ -27,5 +27,6 @@ class Content:
             self.media_title = (
                 self.content["postMedia"]["posterImage"]["original"]["url"] or None
             )
+
         if self.type == "Comment":
             self.url = f"https://kitsu.io/comments/{self.id}"

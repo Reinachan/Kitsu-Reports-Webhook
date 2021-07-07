@@ -9,7 +9,6 @@ class User:
         self.avatar: Optional[str] = self.avatar(user["avatarImage"]["original"]["url"])
 
     def avatar(self, avatar):
-        print("AVATAR")
         try:
             if avatar == "/avatars/original/missing.png":
                 return "https://kitsu.io/images/default_avatar-2ec3a4e2fc39a0de55bf42bf4822272a.png"
