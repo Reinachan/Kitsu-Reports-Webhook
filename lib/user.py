@@ -12,7 +12,7 @@ class User:
         try:
             if avatar == "/avatars/original/missing.png":
                 return "https://kitsu.io/images/default_avatar-2ec3a4e2fc39a0de55bf42bf4822272a.png"
-            if avatar == None:
+            if avatar is None:
                 return "https://kitsu.io/images/default_avatar-2ec3a4e2fc39a0de55bf42bf4822272a.png"
             return avatar
         except:
@@ -27,6 +27,14 @@ class Moderator(User):
 class Reporter(User):
     def __init__(self, u_id):
         super().__init__(u_id)
+
+        if self._id[:1] == "-":
+            self.system_user()
+
+    def system_user(self):
+        self.url = "https://kitsu.io/users/1"
+        self.name = "Auto Reporter"
+        self.avatar = "https://avatars.githubusercontent.com/u/7648832?s=200&v=4"
 
 
 class NaughtyUser(User):

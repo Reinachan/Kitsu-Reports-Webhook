@@ -44,6 +44,7 @@ def get_reports(token):
                 author {
                   ...User
                 }
+                content
                 postMedia: media {
                   ...Media
                 }
