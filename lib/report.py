@@ -11,8 +11,6 @@ def fetch_reports():
 
     reports = get_reports(auth_token)
 
-    print(reports)
-
     for report in reports["reports"]["nodes"][::-1]:
         rep = Report(report)
 
