@@ -1,24 +1,19 @@
 # Kitsu Reports to Webhook
 
-Fetch Reports From Kitsu and Send Them to a Discord Webhook
+Fetch reports from Kitsu and send them to a Discord webhook
+
+Reports look something like this
+
+<img width="400px" src="https://i.imgur.com/ZXho4t0.png" alt="preview"></img>
 
 ## Setup Requirements
 
-Create a file called `env.py` in root. Add this to it and replace the strings with relevant details.
+Fill in the `.env` file with the appropriate information.
 
-```python
-webhook = "Discord webhook link"
-token = "Kitsu accesstoken"
-```
-
-Run script by calling `python reports-fetch.py` in root directory. Requires an account with moderator or admin priviledges on Kitsu.
+Run `pip install pipenv` to install pipenv<br>
+Run `pipenv sync` to download dependencies<br>
+Run `pipenv run python main.py` to start the program<br>
 
 ## Notes
 
-Writing the SQLite database structure in [DB Browser for SQLite](https://sqlitebrowser.org/)
-
-## Missing/Planned functionality
-
-- REFACTOR!!
-- Fetch token and refresh regularly
-- Display content of offense
+Currently it won't remove old reports, so the reports.json will just get larger and larger. Eventually I'll strip it of older and unecessary report logs.
