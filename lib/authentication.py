@@ -18,9 +18,9 @@ def token_expired():
     unix_now = time.mktime(now) + 120.0
 
     if expiry >= unix_now:
-        print("expired")
+        print("not expired")
         return False
-    print("not expired")
+    print("expired")
     return expiry
 
 
