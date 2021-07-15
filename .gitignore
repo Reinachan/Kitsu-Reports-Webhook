@@ -1,7 +1,11 @@
+# IDE
+.vscode
+/.devcontainer
+
+# Environment variables
 env.py
 .env
+
+# Caching
 reports.json
 __pycache__
-.vscode
-.env
-/.devcontainer
